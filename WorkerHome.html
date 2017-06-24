@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>PikaShift</title>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel='stylesheet' href='fullcalendar/fullcalendar.css' />
+
+  
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="mainLayout.css">
+
+  <script src='fullcalendar/lib/moment.min.js'></script>
+  <script src='fullcalendar/fullcalendar.js'></script>
+
+  <!-- Bootstrap Date-Picker Plugin -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+    <style>.bootstrap-iso .formden_header h2, .bootstrap-iso .formden_header p, .bootstrap-iso form{font-family: Arial, Helvetica, sans-serif; color: black}.bootstrap-iso form button, .bootstrap-iso form button:hover{color: white !important;} .asteriskField{color: red;}</style>
+
+  <script src="http://cdn.jsdelivr.net/qtip2/3.0.3/jquery.qtip.min.js"></script>
+  <link rel='stylesheet' href="http://cdn.jsdelivr.net/qtip2/3.0.3/jquery.qtip.min.css"/>
+  <script src='CalendarSetup.js'></script>
+
+  <script src='validation.js'></script>
+  <script src='announcement.js'></script>
+
+<script>
+  var otherHelpoutSources = [
+            {
+              title  : 'Helpout',
+              id     : 'h2017-05-094pm6pm',
+              start  : '2017-05-09T16:00:00',
+              end    : '2017-05-09T18:00:00',
+              color  : 'blue',
+              startEditable : false,
+              durationEditable : false,
+          },
+          {
+              title  : 'Helpout',
+              id     : 'h2017-05-126pm8pm',
+              start  : '2017-05-12T18:00:00',
+              end    : '2017-05-12T20:00:00',
+              color  :'blue',
+              startEditable : false,
+              durationEditable : false,
+          },
+          {
+              title  : 'Helpout',
+              id     : 'h2017-05-161pm2pm',
+              start  : '2017-05-16T13:00:00',
+              end    : '2017-05-16T14:00:00',
+              color  :'blue',
+              startEditable : false,
+              durationEditable : false,
+          },
+          {
+              title  : 'Helpout',
+              id     : 'h2017-05-206pm9pm',
+              start  : '2017-05-20T18:00:00',
+              end    : '2017-05-20T21:00:00',
+              color  :'blue',
+              startEditable : false,
+              durationEditable : false,
+          }
+  ];
+  var myHelpoutSources = [{
+              title  : 'Helpout',
+              id     : 'h2017-05-112pm3pm',
+              start  : '2017-05-11T14:00:00',
+              end    : '2017-05-11T15:00:00',
+              color  :'blue',
+              startEditable : false,
+              durationEditable : false,
+          },
+          {
+              title  : 'Helpout',
+              id     : 'h2017-05-186pm8pm',
+              start  : '2017-05-18T18:00:00',
+              end    : '2017-05-18T20:00:00',
+              color  :'blue',
+              startEditable : false,
+              durationEditable : false,
+          }];
+  var absenceSources = [
+        {
+            title  : 'Absent',
+            id     : 'a2017-04-106pm9pm',
+            start  : '2017-04-10T18:00:00',
+            end    : '2017-04-10T21:00:00',
+            color  :'black',
+            startEditable : false,
+            durationEditable : false,
+        }];
+// Final initialization entry point: the Javascript code inside this block
+// runs at the end of start-up when the page has finished loading.
+$(document).ready(function()
+{
+
+  myScheduleSetup(); //sets up My Schedule
+
+  $('#allAbsences').fullCalendar({
+      defaultView: 'agendaWeek',
+      editable: true,
+      //eventLimit: true, // allow "more" link when too many events
+      header: {
+        left: 'prev, next today',
+        center: 'title',
+        right: 'agendaWeek, agendaDay'
+      },
+      height: 'auto',
+      minTime: '9:00',
+      maxTime: '21:00',
+      allDaySlot: false,
+      slotDuration: "1:00:00",
+      selectable: false,
+      eventSources: [otherHelpoutSources],
+
+      eventClick: function(event, jsEvent, view) {
+        var start = new Date();
+        start.setHours(event.start._d.getHours() + 4); //actual start time
+        var end = new Date();
+        end.setHours(event.end._d.getHours() + 4); //actual end time
+        //update new absence form
+        
+        // $("#newHelpout").trigger('click');
+        $("#helpoutModal").modal('show');
+
+        var startText = start.getHours() + "am";
+        var endText = end.getHours() + 'am';
+        if (start.getHours() > 12) {startText = (start.getHours() - 12)+ 'pm';}
+        else if (start.getHours() == 12) {startText = start.getHours() + 'pm';}
+        if (end.getHours() > 12) { endText = (end.getHours() - 12) + 'pm';}
+        else if (end.getHours() == 12) {endText = end.getHours() + 'pm';}
+      
+        $("#helpout-date").val(event.start._i.slice(0,10));
+        $("#helpout-start-time").val(startText);
+        $("#helpout-end-time").val(endText);
+        var confirmation = event.start._i.slice(0,10) + " " + startText + " - " + endText 
+        document.getElementById("helpoutConfirmation").innerHTML = confirmation
+        },
+    });  //.fullcalendar()
+
+  addHelpoutEvent("2017-05-11", "2pm", "3pm");
+  addHelpoutEvent("2017-05-18", "6pm", "8pm");
+  // addAbsence("2017-04-10", "6pm", "9pm", "Vacation");
+  addAbsence("2017-05-12", "6pm", "8pm", "Family");
+  // addAbsenceEvent("2017-04-10", "6pm", "9pm", "Vacation");
+  addAbsenceEvent("2017-05-12", "6pm", "8pm", "Family");
+}); //document.ready()
+
+  $("body").on("hidden.bs.modal", function(){
+    $("#absence-form").trigger('reset');
+  });
+
+  $('body').click(function(){
+    console.log('clicked');
+  });
+
+  function handleAbsenceChange() {
+    if (document.getElementById('show-absences').checked) {
+      $('#calendar').fullCalendar('addEventSource', absenceSources);
+    } else {
+      $('#calendar').fullCalendar('removeEventSource', absenceSources);
+    }
+  }
+
+  function handleHelpoutChange() {
+    if (document.getElementById('show-helpouts').checked) {
+      $('#calendar').fullCalendar('addEventSource', myHelpoutSources);
+    } else {
+      $('#calendar').fullCalendar('removeEventSource', myHelpoutSources);
+    }
+  }
+
+  function addAbsence(date, startTime, endTime, reason) {
+    $('#calendar').fullCalendar('removeEventSource', absenceSources);
+    var startModified;
+    if (startTime.indexOf('am') != -1) {
+      startModified = startTime.slice(0,-2);
+    } else {
+      startModified = parseInt(startTime.slice(0,-2)) + 12;
+    }
+    var endModified;
+    if (endTime.indexOf('am') != -1) {
+      endModified = endTime.slice(0,-2);
+    } else {
+      endModified = parseInt(endTime.slice(0,-2)) + 12;
+    }
+
+    var newEvent = new Object();
+    newEvent.title = 'Absent';
+    newEvent.id = 'a' + date + startTime + endTime;
+    newEvent.start = date + 'T' + startModified + ':00:00Z';
+    newEvent.end = date + 'T' + endModified + ':00:00Z';
+    newEvent.color = 'black';
+    newEvent.startEditable = false;
+    newEvent.durationEditable = false;
+    absenceSources.push(newEvent);
+    $('#calendar').fullCalendar('addEventSource', absenceSources);
+  }
+
+  function removeAbsence(date, startTime, endTime) {
+    $('#calendar').fullCalendar('removeEventSource', absenceSources);
+    var id = 'a' + date + startTime + endTime;
+    var dummy = [];
+    for (var i = 0; i < absenceSources.length; i++) {
+      if (absenceSources[i].id != id) {
+        dummy.push(absenceSources[i]);
+      }
+    }
+    absenceSources = dummy;
+    $('#calendar').fullCalendar('addEventSource', absenceSources);
+  }
+
+  function addHelpout(date, startTime, endTime, calendarID) {
+    var startModified;
+    if (startTime.indexOf('am') != -1) {
+      startModified = startTime.slice(0,-2);
+    } else {
+      startModified = parseInt(startTime.slice(0,-2)) + 12;
+    }
+    var endModified;
+    if (endTime.indexOf('am') != -1) {
+      endModified = endTime.slice(0,-2);
+    } else {
+      endModified = parseInt(endTime.slice(0,-2)) + 12;
+    }
+
+    var newEvent = new Object();
+    newEvent.title = 'Helpout';
+    newEvent.id = 'h' + date + startTime + endTime;
+    newEvent.start = date + 'T' + startModified + ':00:00Z';
+    newEvent.end = date + 'T' + endModified + ':00:00Z';
+    newEvent.color = 'blue';
+    newEvent.startEditable = false;
+    newEvent.durationEditable = false;
+    $('#allAbsences').fullCalendar('removeEventSource', otherHelpoutSources);
+    $('#calendar').fullCalendar('removeEventSource', myHelpoutSources);
+    if (calendarID == "all") { // I claimed a shift and now we add it to my calendar
+      myHelpoutSources.push(newEvent);
+      var dummy = [];
+      for (var i = 0; i < otherHelpoutSources.length; i++) {
+        if (otherHelpoutSources[i].id != newEvent.id) {
+          dummy.push(otherHelpoutSources[i]);
+        }
+      }
+      otherHelpoutSources = dummy;
+      
+      $('#allAbsences').fullCalendar('addEventSource', otherHelpoutSources);
+      $('#calendar').fullCalendar('addEventSource', myHelpoutSources);
+    }
+    else { // I add a helpout;
+      otherHelpoutSources.push(newEvent);
+      var dummy = [];
+      for (var i = 0; i < myHelpoutSources.length; i++) {
+        if (myHelpoutSources[i].id != newEvent.id) {
+          dummy.push(myHelpoutSources[i]);
+        }
+      }
+      myHelpoutSources = dummy;
+      $('#allAbsences').fullCalendar('addEventSource', otherHelpoutSources);
+      $('#calendar').fullCalendar('addEventSource', myHelpoutSources);
+    }
+  }
+
+  // function removeHelpout(date, startTime, endTime) {
+  //     var removeID = date + startTime + endTime;
+  //     $('#allAbsences').fullCalendar('removeEvents', removeID);
+  // }
+  // function removeHelpout(date, startTime, endTime) {
+  //     var removeID = 'h' + date + startTime + endTime;
+  //     var dummy = [];
+  //     for (var i = 0; i < otherHelpoutSources.length; i++) {
+  //       if (otherHelpoutSources[i].id != removeID) {
+  //         dummy.push(otherHelpoutSources[i]);
+  //       }
+  //     }
+  //     otherHelpoutSources = dummy;
+  //     $('#allAbsences').fullCalendar('addEventSource', otherHelpoutSources);
+  // }
+
+
+  $(document).on('click', '#all-tab', function(e) {
+      setTimeout(function(){
+        $('.fc-agendaWeek-button').click();
+      }, 150) 
+  })
+
+  $(document).on('click', '#absence-close-btn', function(e) {
+    $("#absence-form").trigger('reset');
+  });
+
+  $(document).on('click', '#helpout-close-btn', function(e) {
+    $("#helpout-form").trigger('reset');
+  });
+
+  $(document).on('click', '#absence-submit-btn', function(e) {
+    var date = $("#absence-date").val();
+    var startTime = $("#absence-start-time").val();
+    var endTime = $("#absence-end-time").val();
+    var reason = $("#absence-reason").val();
+
+    if (!dateValidation(date)) {
+      $("#date-failed").html("Please enter a date that you have a work shift.");
+    }
+    else {
+      $("#date-failed").html("&nbsp;");
+
+        if (!startValidation(startTime)) {
+          $('#start-failed').html("Please enter a valid start time");
+        }
+        else{
+          $("#start-failed").html("&nbsp;");
+          if (!endValidation(endTime)){
+            $('#end-failed').html("Please enter a valid end time");
+          }else {
+            $("#end-failed").html("&nbsp;");
+          
+            if (!startEndValidation(startTime, endTime)) {
+              $('#end-failed').html("End time should be after start time.");
+            }
+            else {
+              $("#end-failed").html("&nbsp;");
+
+              if (!reasonValidation(reason)) {
+                $("#reason-failed").html("Please enter a reason");
+              }
+              else{
+                $("#reason-failed").html("&nbsp;");
+                addAbsence(date, startTime, endTime, reason);
+                addAbsenceEvent(date, startTime, endTime, reason);
+                $("#absence-form").trigger('reset');
+                $("#absence-close-btn").trigger("click");
+            }
+          }
+        }
+      }
+    }
+    //$('.nav-tabs a[href="#absences-tab"]').tab('show');
+    // $('.nav-tabs a[href="#allAbsences"]').tab('show');
+  });
+
+  $(document).on('click', '#helpout-submit-btn', function(e) {
+    var date = $("#helpout-date").val();
+    var startTime = $("#helpout-start-time").val();
+    var endTime = $("#helpout-end-time").val();
+    // removeHelpout(date, startTime, endTime);
+    addHelpoutEvent(date, startTime, endTime);
+    addHelpout(date, startTime, endTime, 'all');
+    $("#helpout-form").trigger('reset');
+    $('.nav-tabs a[href="#helpouts-tab"]').tab('show');
+    // $('.nav-tabs a[href="#calendar"]').tab('show');
+  });
+
+  var aStartDelete = '<button class="btn btn-xs  absence-del" id="absence-del-btn-';
+  var aEndDelete = '"> <span class="glyphicon glyphicon-remove " aria-hidden="true"></span> </button>';
+
+  var hStartDelete = '<button class="btn btn-xs  helpout-del" id="helpout-del-btn-';
+  var hEndDelete = '"> <span class="glyphicon glyphicon-remove " aria-hidden="true"></span> </button>';
+
+  function addAbsenceEvent(date, startTime, endTime, reason){
+    var table = document.getElementById("absenceTable");
+    var row = table.insertRow(0);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    var cell3 = row.insertCell(2);
+    var cell4 = row.insertCell(3);
+    var time = startTime + " - " + endTime;
+    cell1.innerHTML = "<h5>" + date +"</h5>";
+    cell2.innerHTML = "<h5>" + time +"</h5>";
+    cell3.innerHTML = "<h5>" + reason + "</h5>";
+    cell4.innerHTML = aStartDelete + "a" + date + startTime + endTime + aEndDelete;
+  }
+
+ $(document).on('click', ".absence-del", function(evt)
+{
+   var btnId = $(this).attr('id');
+   var id = btnId.substring(16);
+   var row = $(this).parent().parent();
+   row.remove();
+
+   var date = id.substring(1,11);
+   var startTime = id.substring(11,14);
+   var endTime = id.substring(14,17);
+
+   removeAbsence(date, startTime, endTime);
+});  
+
+ $(document).on('click', ".helpout-del", function(evt)
+{
+   var btnId = $(this).attr('id');
+   var id = btnId.substring(16);
+   var row = $(this).parent().parent();
+   row.remove();
+
+   var date = id.substring(1,11);
+   var startTime = id.substring(11,14);
+   var endTime = id.substring(14,17);
+
+   addHelpout(date, startTime, endTime, "notall");
+});
+
+  function addHelpoutEvent(date, startTime, endTime){
+    var table = document.getElementById("upcoming-helpouts");
+    var row = table.insertRow(0);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    var cell3 = row.insertCell(2);
+    var time = startTime + " - " + endTime;
+    cell1.innerHTML = "<h5>" + date +"</h5>";
+    cell2.innerHTML = "<h5>" + time +"</h5>";
+    cell3.innerHTML = hStartDelete + "h" + date + startTime + endTime + hEndDelete;
+  }
+
+</script>
+</head>
+
+<body>
+
+<!-- Navigation Bar --> 
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" style="color: #999999 !important;">PikaShift</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li id="calendar-tab" class="active"><a data-toggle="tab" href="#calendar">My Schedule</a></li>
+      <li id="all-tab"><a data-toggle="tab" href="#allAbsences"> Claim Helpout</a></li>
+    </ul>
+
+
+    
+    <ul class="nav navbar-nav navbar-right">
+      <li class="dropdown">
+        <a href="#" data-toggle="dropdown" class="dropdown-toggle"><span class="glyphicon glyphicon-user"></span> Welcome, Pikachu</a>
+        <ul class="dropdown-menu">
+          <li><a href="Login.html">Logout</a></li>
+        </ul>
+      </li>    
+    </ul>  </div>
+
+    
+</nav>
+
+<!-- Navigation Bar --> 
+
+<!--- CALENDAR Code -->
+<div class="container col-md-6 column"> 
+  <div class="tab-content">
+    <div id = "calendar" class="tab-pane fade in active"></div>
+    <div id = "allAbsences" class="tab-pane fade"> </div>
+    <div class='row event-filter container' id="filters"> 
+      <form class='event-filter' id = 'selector'> 
+        <input class="calFilter" type="checkbox" value='show-absences' onchange='handleAbsenceChange();' id='show-absences' value='1' checked>
+           Absences 
+        <input class="calFilter" type="checkbox" value='show-helpouts' onchange='handleHelpoutChange();' id='show-helpouts' value='2' checked style='margin-left:20px'>
+           Helpouts 
+      </form>
+    </div>
+  </div>
+</div> 
+
+<script type="text/javascript">
+      $('#calendar-tab').on('click', function() {
+        document.getElementById("filters").style.visibility = "visible";
+      });
+      $('#all-tab').on('click', function() {
+        document.getElementById("filters").style.visibility = "hidden";
+      })
+</script>
+<!-- End Calender Code -->
+
+
+<!-- Tabs Code -->
+<div class="container col-md-5 column">
+
+  <ul class="nav nav-tabs nav-justified">
+    <li class="active" id="notif-tab"> <a data-toggle="tab" href="#notifs-tab"> Announcements </a></li>
+    <li id="absence-tab"><a data-toggle="tab" href="#absences-tab">Absences</a></li>
+    <li id="helpout-tab"><a data-toggle="tab" href="#helpouts-tab">Helpouts</a></li>  
+  </ul>
+
+  <div class="tab-content">
+    <div id="notifs-tab" class="tab-pane fade in active">
+      <!-- Begin Announcement Code -->
+      <div id="new-post">  
+        <div class="row">
+          <label for="new-post-input">Create an Announcement </label>
+          <textarea class="form-control" rows="3" id="new-post-input" placeholder="Write a new Announcement "></textarea>
+        </div> <!-- End of Textbox -->
+        <div class="row">
+          <div class= "col col-md-3">
+            <select class="form-control gappy" id="post-to" align="left">
+              <option selected>Manager</option>
+              <option>Waiters</option>
+              <option>PassOn</option>
+            </select>
+          </div>
+          <div class= "col col-md-4">
+            <span style="color: red; font-size: 12px" id="empty-msg"></span>
+          </div>
+          <div class= "col col-md-5" align="right">
+            <button type="submit" class="btn btn-primary" id="post-btn">Post Announcement</button>
+          </div>
+        </div> <!-- End of Footer -->
+      </div>  <!-- End of New Post -->
+
+      <div id="all-posts">
+          <!-- Sample Post 0 -->
+          <div id="post-0" class="announcement">
+           <div class="row"> 
+            <div class="col col-md-10">
+
+              <div class="row post-person">Manager  <span class="glyphicon glyphicon-triangle-right " aria-hidden="true"></span>
+                <span id="post-to-0">Waiters</span></div> 
+              <div class="row post-time"> 3 hrs </div> 
+            </div> <!-- To From Stuff --> 
+            <div class="col col-md-2 no-side-margin">
+              <!-- No buttons for pikachu -->
+            </div> <!-- End of Edit/ Remove Button Stuff -->
+           </div> <!-- End Post Header -->
+           <div class="row">
+              <div class="col col-md-12 post-details gappy" id="post-details-0"> Happy Hour Today </div>
+            </div> <!-- End of Row Containing Text -->
+          </div> <!-- End Of Sample Post 0-->
+
+
+          <!-- Bristy --> 
+          <!-- Sample Post 1 -->
+          <div id="post-1" class="announcement">
+           <div class="row"> 
+            <div class="col col-md-10">
+
+              <div class="row post-person"> Pikachu  <span class="glyphicon glyphicon-triangle-right " aria-hidden="true"></span>
+                <span id="post-to-1">PassOn</span></div> 
+              <div class="row post-time"> 10 hrs </div> 
+            </div> <!-- To From Stuff --> 
+            <div class="col col-md-2 no-side-margin">
+              
+              <!-- Edit Button -->
+              <button class="btn btn-xs post-edit" id="post-edit-btn-1"> <span class="glyphicon glyphicon-edit " aria-hidden="true"
+              data-toggle="modal" data-target="#postEditModal"></span> </button>
+              <!--- Delete Button -->
+              <button class="btn btn-xs  post-del" id="post-del-btn-1"> <span class="glyphicon glyphicon-remove " aria-hidden="true"></span> </button>
+
+              <!-- No Edit button for this --> 
+            </div> <!-- End of Edit/ Remove Button Stuff -->
+           </div> <!-- End Post Header -->
+           <div class="row">
+              <div class="col col-md-12 post-details gappy" id="post-details-1"> Reservation of Mr. Yokonami at 3pm. Dishwashing Duty today. Clean Tables 1-4 before you leave. </div>
+            </div> <!-- End of Row Containing Text -->
+          </div> <!-- End Of Sample Post 1-->
+
+
+
+            
+        </div> <!-- End of All Posts -->
+
+
+
+    </div> <!--- End of Notifs Tab -->
+   
+
+    <!-- Absence -->
+    <div id="absences-tab" class="tab-pane fade">
+      <div class= "wrapper">
+      <button type="button" id="newAbsence" class="btn btn-primary" data-toggle="modal" data-target="#absenceModal" style = "width: 50%"> New Absence</button>
+    </div>
+      <!-- Absence Ends -->
+
+      <table id='absenceTable' style="width:100%">
+        <tr class="lower-border">
+          <td align="center">
+            <h5>2017-04-10</h5>
+          </td>
+          <td align="center">
+            <h5>6pm - 9pm</h5>
+          </td>
+          <td align="center">
+            <h5>Vacation</h5>
+          </td>
+          <td>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- End Absence -->
+
+    <div id="helpouts-tab" class="tab-pane fade">
+       <!-- Commenting out the New Helpout Button --> 
+      <!--<button type="button" class="btn btn-primary btn-block" id = "newHelpout" data-toggle="modal" data-target="#helpoutModal"> New Helpout</button> --> 
+
+
+      <div class="helpout-title" style="padding-top: 10px"><h4> Upcoming Helpouts</h4></div>
+      <table id="upcoming-helpouts" style="width:100%">
+      </table>
+
+      <div class="helpout-title"><h4> Previous Helpouts</h4></div>
+      <table id="previous-helpouts" style="width:100%">
+        <tr class="lower-border">
+          <td align="center">
+            <h5>2017-04-15</h5>
+          </td>
+          <td align="center">
+            <h5>1pm - 2pm</h5>
+          </td>
+        </tr>
+        <tr class="lower-border">
+          <td align="center">
+            <h5>2017-04-11</h5>
+          </td>
+          <td align="center">
+            <h5>6pm - 9pm</h5>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+
+
+    <div class="modal fade" id="absenceModal" role="dialog">
+      <div class="modal-dialog">       
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">New Absence Form</h4>
+          </div>
+          <div class="modal-body">
+
+            <div class="bootstrap-iso">
+             <div class="container-fluid">
+              <div class="row">
+                <form method="post", class="form-horizontal" id="absence-form">
+                 <div class="form-group has-danger">
+                  <div class="row vertical-align">
+                    <label class="control-label requiredField col-md-4" for="absence-date">
+                     Date
+                     <span class="asteriskField">
+                      *
+                     </span>
+                    </label>
+                    <div class="controls col-md-8">
+                      <input type="date" id="absence-date" min="2000-01-01" style="width:100%" class='form-control'>
+                      <span style="color: red; font-size: 12px" id="date-failed">&nbsp;  </span>
+
+                    </div>
+                  </div>
+                 </div>
+                 <div class="form-group ">
+                  <div class="row vertical-align">
+                    <label class="control-label requiredField col-md-4" for="absence-start-time">
+                     Start time
+                     <span class="asteriskField">
+                      *
+                     </span>
+                    </label>
+                    <div class="controls col-md-8">
+                      <select class="select form-control" id="absence-start-time" name="absence-start-time">
+                        <option disabled selected value> -- select an option -- </option>
+                       <option value="1pm">
+                        1pm
+                       </option>
+                       <option value="2pm">
+                        2pm
+                       </option>
+                       <option value="3pm">
+                        3pm
+                       </option>
+                       <option value="4pm">
+                        4pm
+                       </option>
+                       <option value="5pm">
+                        5pm
+                       </option>
+                       <option value="6pm">
+                        6pm
+                       </option>
+                       <option value="7pm">
+                        7pm
+                       </option>
+                       <option value="8pm">
+                        8pm
+                       </option>
+                      </select>
+                      <span style="color: red; font-size: 12px" id="start-failed">&nbsp;  </span>
+                    </div>
+                  </div>
+                 </div>
+                 <div class="form-group ">
+                  <div class="row vertical-align">
+                    <label class="control-label requiredField col-md-4" for="absence-end-time">
+                     End time
+                     <span class="asteriskField">
+                      *
+                     </span>
+                    </label>
+                    <div class="controls col-md-8">
+                      <select class="select form-control" id="absence-end-time" name="absence-end-time">
+                        <option disabled selected value> -- select an option -- </option>
+                       <option value="2pm">
+                        2pm
+                       </option>
+                       <option value="3pm">
+                        3pm
+                       </option>
+                       <option value="4pm">
+                        4pm
+                       </option>
+                       <option value="5pm">
+                        5pm
+                       </option>
+                       <option value="6pm">
+                        6pm
+                       </option>
+                       <option value="7pm">
+                        7pm
+                       </option>
+                       <option value="8pm">
+                        8pm
+                       </option>
+                       <option value="9pm">
+                        9pm
+                       </option>
+                      </select>
+                      <span style="color: red; font-size: 12px" id="end-failed">&nbsp;  </span>
+                    </div>
+                  </div>
+                 </div>
+                 <div class="form-group " id="div_absence-reason">
+                  <div class="row vertical-align">
+                    <label class="control-label requiredField col-md-4" for="absence-reason">
+                     Reason
+                     <span class="asteriskField">
+                      *
+                     </span>
+                    </label>
+                    <div class="controls col-md-8">
+                      <select class="select form-control" id="absence-reason" name="absence-reason">
+                        <option disabled selected value> -- select an option -- </option>
+                       <option value="Sickness">
+                        Sickness
+                       </option>
+                       <option value="Vacation">
+                        Vacation
+                       </option>
+                       <option value="Family">
+                        Family
+                       </option>
+                       <option value="Other">
+                        Other
+                       </option>
+                      </select>
+                      <span style="color: red; font-size: 12px" id="reason-failed">&nbsp;  </span>
+                    </div>
+                  </div>
+                 </div>
+                </form>
+              </div>
+             </div>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default pull-left" id="absence-close-btn" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary pull-right" id="absence-submit-btn">
+              Submit
+            </button>
+          </div>
+        </div>       
+      </div>
+    </div>
+
+
+    <div class="modal fade" id="helpoutModal" role="dialog">
+      <div class="modal-dialog">       
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h3 class="modal-title">Helpout Confirmation</h3>
+          </div>
+          <div class="modal-body">
+            <h5 style = "border-bottom: 15px"> You are about to helpout at the following time: </h5>
+            <h5 id='helpoutConfirmation'> </h5>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default pull-left" id="helpout-close-btn" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary pull-right" id="helpout-submit-btn" data-dismiss="modal">
+              OK
+            </button>
+          </div>
+        </div>        
+      </div>    
+  </div>
+
+
+
+
+
+
+
+    <div class="modal fade" id="helpoutModalOld" role="dialog">
+      <div class="modal-dialog">       
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">New Helpout Form</h4>
+          </div>
+          <div class="modal-body">
+
+            <div class="bootstrap-iso">
+             <div class="container-fluid">
+              <div class="row">
+                <form method="form-horizontal">
+
+                 <div class="form-group ">
+                  <div class="row vertical-align">
+                    <label class="control-label requiredField col-md-4" for="helpout-date">
+                     Date
+                     <span class="asteriskField">
+                      *
+                     </span>
+                    </label>
+                    <div class="controls col-md-8">
+                      <input type="date" id="helpout-date" min="2000-01-01" style="width:100%">
+                    </div>
+                  </div>
+                 </div>
+
+                 <div class="form-group ">
+                  <div class="row vertical-align">
+                    <label class="control-label requiredField col-md-4" for="helpout-start-time">
+                     Start time
+                     <span class="asteriskField">
+                      *
+                     </span>
+                    </label>
+                    <div class="controls col-md-8">
+                      <select class="select form-control" id="helpout-start-time" name="helpout-start-time">
+                        <option disabled selected value> -- select an option -- </option>
+                       <option value="9am">
+                        9am
+                       </option>
+                       <option value="10am">
+                        10am
+                       </option>
+                       <option value="11am">
+                        11am
+                       </option>
+                       <option value="12pm">
+                        12pm
+                       </option>
+                       <option value="1pm">
+                        1pm
+                       </option>
+                       <option value="2pm">
+                        2pm
+                       </option>
+                       <option value="3pm">
+                        3pm
+                       </option>
+                       <option value="4pm">
+                        4pm
+                       </option>
+                       <option value="5pm">
+                        5pm
+                       </option>
+                       <option value="6pm">
+                        6pm
+                       </option>
+                       <option value="7pm">
+                        7pm
+                       </option>
+                       <option value="8pm">
+                        8pm
+                       </option>
+                      </select>
+                    </div>
+                  </div>
+                 </div>
+
+                 <div class="form-group ">
+                  <div class="row vertical-align">
+                    <label class="control-label requiredField col-md-4" for="helpout-end-time">
+                     End time
+                     <span class="asteriskField">
+                      *
+                     </span>
+                    </label>
+                    <div class="controls col-md-8">
+                      <select class="select form-control" id="helpout-end-time" name="helpout-end-time">
+                        <option disabled selected value> -- select an option -- </option>
+                       <option value="10am">
+                        10am
+                       </option>
+                       <option value="11am">
+                        11am
+                       </option>
+                       <option value="12pm">
+                        12pm
+                       </option>
+                       <option value="1pm">
+                        1pm
+                       </option>
+                       <option value="2pm">
+                        2pm
+                       </option>
+                       <option value="3pm">
+                        3pm
+                       </option>
+                       <option value="4pm">
+                        4pm
+                       </option>
+                       <option value="5pm">
+                        5pm
+                       </option>
+                       <option value="6pm">
+                        6pm
+                       </option>
+                       <option value="7pm">
+                        7pm
+                       </option>
+                       <option value="8pm">
+                        8pm
+                       </option>
+                       <option value="9pm">
+                        9pm
+                       </option>
+                      </select>
+                    </div>
+                  </div>
+                 </div>
+                </form>                           
+              </div>
+             </div>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default pull-left" id="helpout-close-btn" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary pull-right" id="helpout-submit-btn" data-dismiss="modal">
+              Submit
+            </button>
+          </div>
+        </div>        
+      </div>    
+  </div>
+
+  <div class="container col-md-1"></div>
+</div>  <!-- End Tabs Code -->
+
+
+
+<!--- Edit Post Modal Code  : Bristy Sikder--> 
+
+<div class="modal fade" id="postEditModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Edit Announcement</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+          <div class="row">
+            <textarea class="form-control" rows="3" id="edit-post-input" placeholder="Write a new Announcement "></textarea>
+          </div> <!-- End of Textbox -->
+          
+      </div>
+      <div class="modal-footer">
+        <div class="row">
+          <div class= "col col-md-3">
+            <select class="form-control gappy" id="edit-post-to">
+              <option value="1">Manager</option>
+              <option value="2">Waiters</option>
+              <option value="3">PassOn</option>
+            </select>
+          </div>
+          <div class= "col col-md-6"> </div>
+          <div class= "col col-md-3" >
+            <button type="submit" class="btn btn-primary" id="edit-save-btn" data-dismiss="modal" > Save </button>
+          </div>
+          <!-- No delete button for now 
+          <div class= "col col-md-3" >
+            <button type="submit" class="btn btn-primary" id="edit-delete-btn" data-dismiss="modal" > Delete </button>
+          </div>
+          --> 
+        </div> <!-- End of Footer -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- End Modal -->
+</body>
+</html>
